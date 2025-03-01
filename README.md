@@ -11,4 +11,3 @@ The goal of this assignment is to apply data-cleaning techniques using R.
 - Possibly creating visualizations for better data insights.
 - Documenting findings and pushing changes to GitHub.
 
-All code is stored in `assignment-6.Rmd`.  
