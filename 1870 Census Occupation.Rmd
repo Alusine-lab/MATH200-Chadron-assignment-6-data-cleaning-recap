@@ -1,0 +1,74 @@
+---
+title: "1870 Census Occupation"
+author: "Alusine Samura"
+date: "2025-02-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task Description
+
+In this task, we will be working with the 1870 Census Data on people's occupation, which contains state-level aggregates of occupation by gender. The goal is to:
+
+- Use `tidyr` to reshape the data into a long format.
+- Separate the `occupation.gender` variable into two variables: `occupation` and `gender`.
+- Create scatter plots to compare the values for men against women, faceted by occupation.
+
+```{r}
+# Load necessary libraries
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(readr)  # Updated to use read_csv()
+
+# Load the dataset directly from the URL (or use your local path)
+data <- read_csv("occupation-1870.csv")
+
+# Check the first few rows of the data to understand its structure
+head(data)
+
+# Dynamically select columns corresponding to male and female counts
+cols <- grep("Male|Female", colnames(data), value = TRUE)
+
+# Gather the data into long format using pivot_longer
+data_long <- data %>%
+  pivot_longer(cols = all_of(cols), names_to = "occupation.gender", values_to = "count")
+
+# Separate the "occupation.gender" column into occupation and gender
+data_long <- data_long %>%
+  separate(occupation.gender, into = c("occupation", "gender"), sep = "\\.")
+
+# Check data after separation
+head(data_long)
+
+# Pivot the data to wide format (one column per gender)
+data_wide <- data_long %>%
+  pivot_wider(names_from = "gender", values_from = "count", values_fill = list(count = 0))
+
+# Check the wide-format data
+head(data_wide)
+
+# Create a scatter plot comparing men's and women's counts, facetted by occupation
+ggplot(data_wide, aes(x = Male, y = Female, color = occupation)) +
+  geom_point(size = 3, alpha = 0.7) +  # Adjust size and transparency of points
+  facet_wrap(~ occupation) +
+  labs(
+    title = "Occupation Comparison by Gender in the 1870 Census",
+    subtitle = "Men vs. Women by Occupation",
+    x = "Men's Count",
+    y = "Women's Count",
+    caption = "Data from the 1870 Census"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(size = 8, face = "italic"),
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12, face = "italic")
+  )
+
+```
+
